@@ -230,3 +230,4 @@ if __name__ == "__main__":
     ventana.configure(bg="white")
     juego = PalabraJuego(ventana)
     ventana.mainloop()
+    ##

@@ -144,30 +144,44 @@ class palabra:
         self.boton_adivinar.config(state="normal")
 
     def adivinar_palabra(self):
+
         palabra = self.entrada_palabra.get()
+
         if not self.cronometro_corriendo:
             self.iniciar_cronometro()
             self.cronometro_corriendo = True
 
         if len(palabra) == 5 and palabra.isalpha() and palabra.islower():
+
             self.etiqueta_error.config(text="")
             self.tablero.actualizar_tablero(palabra)
             self.actualizar_tablero()
-            if "".join(self.tablero.matriz[self.tablero.num_intentos - 1]) == self.palabra_correcta:
+
+            if palabra == self.palabra_correcta:
                 self.etiqueta_tablero.config(text="¡Has adivinado la palabra!")
                 self.detener_cronometro()
                 self.mostrar_resultados(resultado="Victoria")
                 self.boton_adivinar.config(state="disabled")
-            elif self.tablero.num_intentos == 6:
-                self.etiqueta_tablero.config(
-                    text=f"¡Agotaste tus intentos! La palabra correcta era: {self.palabra_correcta}")
-                self.detener_cronometro()
-                self.mostrar_resultados(resultado="Derrota")
-                self.boton_adivinar.config(state="disabled")
+
+            else:
+                if self.tablero.num_intentos == 6:
+                    self.etiqueta_tablero.config(
+                        text=f"¡Agotaste tus intentos! La palabra correcta era: {self.palabra_correcta}")
+                    self.detener_cronometro()
+                    self.mostrar_resultados(resultado="Derrota")
+                    self.boton_adivinar.config(state="disabled")
+
+                else:
+                    # Seguir jugando
+                    pass
+
         else:
             self.etiqueta_error.config(text="Por favor, ingresa una palabra válida de 5 letras en minúsculas.")
 
+    # Resto del método
     def mostrar_resultados(self, resultado):
+
+        intentos = self.tablero.num_intentos
         if self.resultado_ventana:
             self.resultado_ventana.destroy()
 
@@ -178,7 +192,7 @@ class palabra:
         partidas_jugadas, victorias, racha_actual, mejor_racha = self.calcular_estadisticas()
 
         # Agrega el resultado actual al historial de juegos
-        self.guardar_resultado(self.palabra_correcta, self.entrada_palabra.get(), resultado)
+        self.guardar_resultado(self.palabra_correcta, self.entrada_palabra.get(), resultado, intentos)
 
         # Obtener el significado de la palabra correcta
         palabra_correcta = self.palabra_correcta
@@ -215,27 +229,34 @@ class palabra:
         self.mostrar_grafico(partidas_jugadas)
 
     def calcular_estadisticas(self):
+
         partidas_jugadas, victorias, racha_actual, mejor_racha = 0, 0, 0, 0
 
         with open("historial_juegos.txt", "r") as file:
             lines = file.readlines()
+
             for line in lines:
                 if "Victoria" in line:
                     victorias += 1
+
+                    # Aquí agregas la línea para leer los intentos
+                    intentos = int(line.split(", Intentos: ")[1])
+
                     racha_actual += 1
                     mejor_racha = max(mejor_racha, racha_actual)
                 else:
-                    racha_actual = 0  # Reiniciar la racha si no es una victoria
+                    racha_actual = 0
+
             partidas_jugadas = len(lines)
 
         return partidas_jugadas, victorias, racha_actual, mejor_racha
 
-    def guardar_resultado(self, palabra_correcta, palabra_ingresada, resultado):
+    def guardar_resultado(self, palabra_correcta, palabra_ingresada, resultado, intentos):
         historial_juegos_file = "historial_juegos.txt"
 
         with open(historial_juegos_file, "a") as file:
             file.write(
-                f"Palabra correcta: {palabra_correcta}, Palabra ingresada: {palabra_ingresada}, Resultado: {resultado}\n")
+                f"Palabra correcta: {palabra_correcta}, Palabra ingresada: {palabra_ingresada}, Resultado: {resultado}, Intentos: {intentos}\n")
 
     def iniciar_cronometro(self):
         self.tiempo_inicio = time.time()

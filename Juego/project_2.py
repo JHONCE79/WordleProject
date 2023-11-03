@@ -1,48 +1,8 @@
-import textwrap
-from tkinter import *
+import tkinter as tk
 import requests
 import time
-import os
 
-historial_juegos_file = "historial_juegos.txt"
-
-if not os.path.exists(historial_juegos_file):
-    with open(historial_juegos_file, "w") as file:
-        pass
-
-# Define la función para obtener una palabra aleatoria
-def get_random_word(length):
-    random_word_api_url = "https://random-word-api.herokuapp.com/word"
-
-    random_word_api_response = requests.get(
-        random_word_api_url, params={"length": length, "lang": "en"})
-
-    random_word = random_word_api_response.json()[0]
-
-    return random_word
-
-def get_word_definition(word):
-    url = "https://api.dictionaryapi.dev/api/v2/entries/en/{}"
-    response = requests.get(url.format(word))
-    return response
-
-def get_random_word_with_meaning(length):
-    status_code = 404
-
-    while status_code != 200:
-        word = get_random_word(length)
-        meaning_response = get_word_definition(word)
-
-        status_code = meaning_response.status_code
-
-    definition = meaning_response.json()[0]["meanings"][0]["definitions"][0]["definition"]
-
-    random_word = {
-        'word': word,
-        'definition': definition
-    }
-
-    return random_word
+HISTORIAL_JUEGOS_FILE = "historial_juegos.txt"
 
 class Tablero:
     def __init__(self, palabra_correcta):
@@ -56,7 +16,6 @@ class Tablero:
             self.matriz.append(["_" for _ in range(5)])
 
     def actualizar_tablero(self, palabra):
-
         if self.num_intentos < 6:
             if palabra == self.palabra_correcta:
                 for i, letra in enumerate(palabra):
@@ -73,7 +32,32 @@ class Tablero:
                         self.matriz[self.num_intentos][i] = letra
                 self.num_intentos += 1
 
-class palabra:
+class Estadisticas:
+    def __init__(self):
+        self.partidas_jugadas = 0
+        self.victorias = 0
+        self.racha_actual = 0
+        self.mejor_racha = 0
+        self.total_intentos = 0
+
+    def actualizar_estadisticas(self, resultado, intentos):
+        self.partidas_jugadas += 1
+        self.total_intentos += intentos
+
+        if resultado == "Victoria":
+            self.victorias += 1
+            self.racha_actual += 1
+            self.mejor_racha = max(self.mejor_racha, self.racha_actual)
+        else:
+            self.racha_actual = 0
+
+    def porcentaje_victorias(self):
+        return (self.victorias / self.partidas_jugadas) * 100 if self.partidas_jugadas > 0 else 0
+
+    def frecuencia_intentos(self):
+        return self.total_intentos / self.partidas_jugadas if self.partidas_jugadas > 0 else 0
+
+class PalabraJuego:
     def __init__(self, ventana):
         self.ventana = ventana
         self.ventana.title("Wordle")
@@ -84,30 +68,30 @@ class palabra:
         for j in range(5):
             self.ventana.columnconfigure(j, weight=1)
 
-        self.palabra_correcta = get_random_word(5)
+        self.palabra_correcta = self.get_random_word(5)
         self.tablero = Tablero(self.palabra_correcta)
 
-        self.etiqueta = Label(ventana, text="WORDLE", font=("Courier", 16))
+        self.etiqueta = tk.Label(ventana, text="WORDLE", font=("Courier", 16))
         self.etiqueta.grid(row=0, column=0, columnspan=5, sticky="nsew")
 
-        self.etiqueta_palabra = Label(ventana, text="Ingresa una palabra de 5 letras en minúsculas:", font=("Courier", 12))
+        self.etiqueta_palabra = tk.Label(ventana, text="Ingresa una palabra de 5 letras en minúsculas:", font=("Courier", 12))
         self.etiqueta_palabra.grid(row=1, column=0, columnspan=5, sticky="nsew")
 
-        self.entrada_palabra = Entry(ventana, font=("Courier", 12))
+        self.entrada_palabra = tk.Entry(ventana, font=("Courier", 12))
         self.entrada_palabra.grid(row=2, column=0, columnspan=5, sticky="nsew")
 
-        self.etiqueta_error = Label(ventana, text="", fg="red", font=("Courier", 12))
+        self.etiqueta_error = tk.Label(ventana, text="", fg="red", font=("Courier", 12))
         self.etiqueta_error.grid(row=4, column=0, columnspan=5, sticky="nsew")
 
-        self.etiqueta_tablero = Label(ventana, text="", font=("Courier", 16))
+        self.etiqueta_tablero = tk.Label(ventana, text="", font=("Courier", 16))
         self.etiqueta_tablero.grid(row=11, column=0, columnspan=5, sticky="nsew")
 
         self.tablero_labels = []
         for i in range(6):
             fila_labels = []
             for j in range(5):
-                label = Label(ventana, text="", width=2, height=1, font=("Courier", 16),
-                              relief="solid", borderwidth=1)
+                label = tk.Label(ventana, text="", width=2, height=1, font=("Courier", 16),
+                                 relief="solid", borderwidth=1)
                 label.grid(row=i + 5, column=j, sticky="nsew")
                 fila_labels.append(label)
             self.tablero_labels.append(fila_labels)
@@ -115,31 +99,34 @@ class palabra:
         self.tiempo_inicio = None
         self.cronometro_corriendo = False
 
-        self.etiqueta_cronometro = Label(ventana, text="Tiempo: 00:00", font=("Courier", 12))
+        self.etiqueta_cronometro = tk.Label(ventana, text="Tiempo: 00:00", font=("Courier", 12))
         self.etiqueta_cronometro.grid(row=11, column=5, sticky="nsew")
 
         self.resultado_ventana = None
 
-        self.boton_reiniciar = Button(ventana, text="Reiniciar Juego", command=self.reiniciar_juego, font=("Courier", 12))
+        self.boton_reiniciar = tk.Button(ventana, text="Reiniciar Juego", command=self.reiniciar_juego, font=("Courier", 12))
         self.boton_reiniciar.grid(row=5, column=5, columnspan=5, sticky="nsew")
 
-        self.boton_salir = Button(ventana, text="Salir", command=ventana.quit, font=("Courier", 12))
+        self.boton_salir = tk.Button(ventana, text="Salir", command=ventana.quit, font=("Courier", 12))
         self.boton_salir.grid(row=6, column=5, columnspan=5, sticky="nsew")
 
-        self.boton_adivinar = Button(ventana, text="Adivinar", command=self.adivinar_palabra, font=("Courier", 12))
+        self.boton_adivinar = tk.Button(ventana, text="Adivinar", command=self.adivinar_palabra, font=("Courier", 12))
         self.boton_adivinar.grid(row=3, column=0, columnspan=5, sticky="nsew")
 
+        self.estadisticas = Estadisticas()
+
     def reiniciar_juego(self):
-        self.palabra_correcta = get_random_word(5)
+        self.palabra_correcta = self.get_random_word(5)
         self.tablero = Tablero(self.palabra_correcta)
-        self.entrada_palabra.delete(0, END)
+        self.entrada_palabra.delete(0, tk.END)
         self.etiqueta_error.config(text="")
         self.etiqueta_tablero.config(text="")
         self.actualizar_tablero()
         self.tiempo_inicio = None
         self.cronometro_corriendo = False
         self.etiqueta_cronometro.config(text="Tiempo: 00:00")
-        self.resultado_ventana.destroy() if self.resultado_ventana else None
+        if self.resultado_ventana:
+            self.resultado_ventana.destroy()
         self.boton_adivinar.config(state="normal")
 
     def adivinar_palabra(self):
@@ -155,73 +142,48 @@ class palabra:
             if "".join(self.tablero.matriz[self.tablero.num_intentos - 1]) == self.palabra_correcta:
                 self.etiqueta_tablero.config(text="¡Has adivinado la palabra!")
                 self.detener_cronometro()
-                self.mostrar_resultados()
+                self.guardar_resultado(self.palabra_correcta, palabra, "Victoria")
+                self.estadisticas.actualizar_estadisticas("Victoria", self.tablero.num_intentos)
+                self.mostrar_estadisticas()
                 self.boton_adivinar.config(state="disabled")
             elif self.tablero.num_intentos == 6:
                 self.etiqueta_tablero.config(
                     text=f"¡Agotaste tus intentos! La palabra correcta era: {self.palabra_correcta}")
                 self.detener_cronometro()
-                self.mostrar_resultados()
+                self.guardar_resultado(self.palabra_correcta, palabra, "Derrota")
+                self.estadisticas.actualizar_estadisticas("Derrota", self.tablero.num_intentos)
+                self.mostrar_estadisticas()
                 self.boton_adivinar.config(state="disabled")
         else:
             self.etiqueta_error.config(text="Por favor, ingresa una palabra válida de 5 letras en minúsculas.")
 
-    def mostrar_resultados(self):
-        if self.resultado_ventana:
-            self.resultado_ventana.destroy()
+    def guardar_resultado(self, palabra_correcta, palabra_ingresada, resultado):
+        resultado_texto = f"Palabra correcta: {palabra_correcta}, Palabra ingresada: {palabra_ingresada}, Resultado: {resultado}, Intentos: {self.tablero.num_intentos}\n"
+        with open(HISTORIAL_JUEGOS_FILE, "a") as file:
+            file.write(resultado_texto)
 
-        self.resultado_ventana = Toplevel(self.ventana)
-        self.resultado_ventana.title("Resultados")
+    def mostrar_estadisticas(self):
+        estadisticas_ventana = tk.Toplevel(self.ventana)
+        estadisticas_ventana.title("Estadísticas")
+        estadisticas_ventana.geometry("300x200")
 
-        # Calcula estadísticas
-        partidas_jugadas = 0
-        victorias = 0
-        racha_actual = 0
-        mejor_racha = 0
+        partidas_jugadas_label = tk.Label(estadisticas_ventana,
+                                          text=f"Partidas Jugadas: {self.estadisticas.partidas_jugadas}")
+        partidas_jugadas_label.pack()
 
-        with open("historial_juegos.txt", "r") as file:
-            lines = file.readlines()
-            partidas_jugadas = len(lines)
-            for line in lines:
-                if "Victoria" in line:
-                    victorias += 1
-                    racha_actual += 1
-                    mejor_racha = max(mejor_racha, racha_actual)
-                else:
-                    racha_actual = 0
+        porcentaje_victorias_label = tk.Label(estadisticas_ventana,
+                                              text=f"% Victorias: {self.estadisticas.porcentaje_victorias():.2f}%")
+        porcentaje_victorias_label.pack()
 
-        # Obtener el significado de la palabra correcta
-        palabra_correcta = self.palabra_correcta
-        meaning_response = get_word_definition(palabra_correcta)
+        racha_actual_label = tk.Label(estadisticas_ventana, text=f"Racha Actual: {self.estadisticas.racha_actual}")
+        racha_actual_label.pack()
 
-        if meaning_response.status_code == 200:
-            definition = meaning_response.json()[0]["meanings"][0]["definitions"][0]["definition"]
-        else:
-            definition = "No se encontró una definición para esta palabra."
+        mejor_racha_label = tk.Label(estadisticas_ventana, text=f"Mejor Racha: {self.estadisticas.mejor_racha}")
+        mejor_racha_label.pack()
 
-        # Muestra estadísticas en la nueva ventana
-        Label(self.resultado_ventana, text=f"Partidas Jugadas: {partidas_jugadas}", font=("Courier", 12)).pack()
-
-        if partidas_jugadas > 0:
-            porcentaje_victorias = (victorias / partidas_jugadas) * 100
-        else:
-            porcentaje_victorias = 0
-
-        Label(self.resultado_ventana, text=f"% Victorias: {porcentaje_victorias:.2f}%", font=("Courier", 12)).pack()
-        Label(self.resultado_ventana, text=f"Racha Actual: {racha_actual}", font=("Courier", 12)).pack()
-        Label(self.resultado_ventana, text=f"Mejor Racha: {mejor_racha}", font=("Courier", 12)).pack()
-
-        # Muestra el significado de la palabra correcta o un mensaje de error
-        if definition == "No se encontró una definición para esta palabra.":
-            Label(self.resultado_ventana, text=f"Palabra correcta: {palabra_correcta}", font=("Courier", 12)).pack()
-            Label(self.resultado_ventana, text="Significado no encontrado.", font=("Courier", 12)).pack()
-        else:
-            significado_lineas = "\n".join(
-                textwrap.wrap(definition, width=40))  # Ajusta el texto a 40 caracteres por línea
-            Label(self.resultado_ventana, text=f"Palabra correcta: {palabra_correcta}", font=("Courier", 12)).pack()
-            Label(self.resultado_ventana, text=f"Significado:", font=("Courier", 12)).pack()
-            Label(self.resultado_ventana, text=significado_lineas, font=("Courier", 12)).pack()
-
+        frecuencia_intentos_label = tk.Label(estadisticas_ventana,
+                                             text=f"Frecuencia de Intentos: {self.estadisticas.frecuencia_intentos():.2f} intentos")
+        frecuencia_intentos_label.pack()
 
     def iniciar_cronometro(self):
         self.tiempo_inicio = time.time()
@@ -257,17 +219,14 @@ class palabra:
                 else:
                     label.config(text=letra, bg="white")
 
-    def guardar_resultado(self, palabra_correcta, palabra_ingresada, resultado):
-        historial_juegos_file = "historial_juegos.txt"
-
-        if os.path.exists(historial_juegos_file):
-            with open(historial_juegos_file, "a") as file:
-                file.write(
-                    f"Palabra correcta: {palabra_correcta}, Palabra ingresada: {palabra_ingresada}, Resultado: {resultado}\n")
-
-ventana = Tk()
+    def get_random_word(self, length):
+        random_word_api_url = "https://random-word-api.herokuapp.com/word"
+        random_word_api_response = requests.get(random_word_api_url, params={"length": length, "lang": "en"})
+        random_word = random_word_api_response.json()[0]
+        return random_word
 
 if __name__ == "__main__":
+    ventana = tk.Tk()
     ventana.configure(bg="white")
-    juego = palabra(ventana)
+    juego = PalabraJuego(ventana)
     ventana.mainloop()

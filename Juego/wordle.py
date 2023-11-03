@@ -235,7 +235,7 @@ class palabra:
 
         with open(historial_juegos_file, "a") as file:
             file.write(
-                f"Palabra correcta: {palabra_correcta}, Palabra ingresada: {palabra_ingresada}, Resultado: {resultado}, Intentos: {self.tablero.num_intentos}\n")
+                f"Palabra correcta: {palabra_correcta}, Palabra ingresada: {palabra_ingresada}, Resultado: {resultado}\n")
 
     def iniciar_cronometro(self):
         self.tiempo_inicio = time.time()
@@ -285,7 +285,7 @@ class palabra:
         labels = [f"{i} intentos" for i in range(1,7)]
 
         # Crear el gráfico de barras
-        plt.figure(figsize=(8, 4))
+        plt.figure(figsize=(10, 6))
         plt.bar(labels, exitos_por_intentos, color='lightblue')
         plt.xlabel('Intentos')
         plt.ylabel('Frecuencia de Adivinanzas Exitosas')

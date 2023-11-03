@@ -9,3 +9,4 @@ Palabra correcta: cyton, Palabra ingresada: print, Resultado: Derrota
 Palabra correcta: moots, Palabra ingresada: print, Resultado: Derrota
 Palabra correcta: merle, Palabra ingresada: print, Resultado: Derrota
 Palabra correcta: gybes, Palabra ingresada: close, Resultado: Derrota
+Palabra correcta: sakis, Palabra ingresada: print, Resultado: Derrota

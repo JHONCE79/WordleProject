@@ -73,7 +73,7 @@ class Tablero:
                         self.matriz[self.num_intentos][i] = letra
                 self.num_intentos += 1
 
-class WordleGame:
+class palabra:
     def __init__(self, ventana):
         self.ventana = ventana
         self.ventana.title("Wordle")
@@ -190,6 +190,15 @@ class WordleGame:
                 else:
                     racha_actual = 0
 
+        # Obtener el significado de la palabra correcta
+        palabra_correcta = self.palabra_correcta
+        meaning_response = get_word_definition(palabra_correcta)
+
+        if meaning_response.status_code == 200:
+            definition = meaning_response.json()[0]["meanings"][0]["definitions"][0]["definition"]
+        else:
+            definition = "No se encontró una definición para esta palabra."
+
         # Muestra estadísticas en la nueva ventana
         Label(self.resultado_ventana, text=f"Partidas Jugadas: {partidas_jugadas}", font=("Courier", 12)).pack()
 
@@ -202,19 +211,17 @@ class WordleGame:
         Label(self.resultado_ventana, text=f"Racha Actual: {racha_actual}", font=("Courier", 12)).pack()
         Label(self.resultado_ventana, text=f"Mejor Racha: {mejor_racha}", font=("Courier", 12)).pack()
 
-        # Guarda el resultado actual
-        resultado = "Victoria" if self.tablero.num_intentos < 6 and "".join(
-            self.tablero.matriz[self.tablero.num_intentos - 1]) == self.palabra_correcta else "Derrota"
-        self.guardar_resultado(self.palabra_correcta, self.entrada_palabra.get(), resultado)
+        # Muestra el significado de la palabra correcta o un mensaje de error
+        if definition == "No se encontró una definición para esta palabra.":
+            Label(self.resultado_ventana, text=f"Palabra correcta: {palabra_correcta}", font=("Courier", 12)).pack()
+            Label(self.resultado_ventana, text="Significado no encontrado.", font=("Courier", 12)).pack()
+        else:
+            significado_lineas = "\n".join(
+                textwrap.wrap(definition, width=40))  # Ajusta el texto a 40 caracteres por línea
+            Label(self.resultado_ventana, text=f"Palabra correcta: {palabra_correcta}", font=("Courier", 12)).pack()
+            Label(self.resultado_ventana, text=f"Significado:", font=("Courier", 12)).pack()
+            Label(self.resultado_ventana, text=significado_lineas, font=("Courier", 12)).pack()
 
-        random_word = get_random_word_with_meaning(5)
-        palabra_correcta = random_word['word']
-        significado = random_word['definition']
-        significado_lineas = "\n".join(textwrap.wrap(significado, width=40))  # Ajusta el texto a 40 caracteres por línea
-
-        Label(self.resultado_ventana, text=f"Palabra correcta: {palabra_correcta}", font=("Courier", 12)).pack()
-        Label(self.resultado_ventana, text=f"Significado:", font=("Courier", 12)).pack()
-        Label(self.resultado_ventana, text=significado_lineas, font=("Courier", 12)).pack()
 
     def iniciar_cronometro(self):
         self.tiempo_inicio = time.time()
@@ -262,7 +269,5 @@ ventana = Tk()
 
 if __name__ == "__main__":
     ventana.configure(bg="white")
-    juego = WordleGame(ventana)
+    juego = palabra(ventana)
     ventana.mainloop()
-
-

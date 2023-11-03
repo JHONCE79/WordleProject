@@ -1,6 +1,0 @@
-Palabra correcta: diker, Palabra ingresada: print, Resultado: Derrota, Intentos: 6
-Palabra correcta: olein, Palabra ingresada: print, Resultado: Derrota, Intentos: 6
-Palabra correcta: kines, Palabra ingresada: print, Resultado: Derrota, Intentos: 6
-Palabra correcta: vinic, Palabra ingresada: print, Resultado: Derrota, Intentos: 6
-Palabra correcta: joule, Palabra ingresada: print, Resultado: Derrota, Intentos: 6
-Palabra correcta: kavas, Palabra ingresada: print, Resultado: Derrota, Intentos: 6

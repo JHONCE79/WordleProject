@@ -1,0 +1,8 @@
+Palabra correcta: tonic, Palabra ingresada: print, Resultado: Derrota
+Palabra correcta: axons, Palabra ingresada: print, Resultado: Derrota
+Palabra correcta: axons, Palabra ingresada: print, Resultado: Derrota
+Palabra correcta: naffs, Palabra ingresada: close, Resultado: Derrota
+Palabra correcta: loath, Palabra ingresada: print, Resultado: Derrota
+Palabra correcta: carpi, Palabra ingresada: print, Resultado: Derrota
+Palabra correcta: nyala, Palabra ingresada: print, Resultado: Derrota
+Palabra correcta: cyton, Palabra ingresada: print, Resultado: Derrota

@@ -20,6 +20,29 @@ def get_random_word(length):
 
     return random_word
 
+def get_word_definition(word):
+    url = "https://api.dictionaryapi.dev/api/v2/entries/en/{}"
+    response = requests.get(url.format(word))
+    return response
+
+def get_random_word_with_meaning(length):
+    status_code = 404
+
+    while status_code != 200:
+        word = get_random_word(length)
+        meaning_response = get_word_definition(word)
+
+        status_code = meaning_response.status_code
+
+    definition = meaning_response.json()[0]["meanings"][0]["definitions"][0]["definition"]
+
+    random_word = {
+        'word': word,
+        'definition': definition
+    }
+
+    return random_word
+
 class Tablero:
     def __init__(self, palabra_correcta):
         self.num_intentos = 0
@@ -182,6 +205,10 @@ class WordleGame:
         resultado = "Victoria" if self.tablero.num_intentos < 6 and "".join(
             self.tablero.matriz[self.tablero.num_intentos - 1]) == self.palabra_correcta else "Derrota"
         self.guardar_resultado(self.palabra_correcta, self.entrada_palabra.get(), resultado)
+
+        random_word = get_random_word_with_meaning(5)
+        Label(self.resultado_ventana, text=f"Palabra correcta: {random_word['word']}", font=("Courier", 12)).pack()
+        Label(self.resultado_ventana, text=f"Significado: {random_word['definition']}", font=("Courier", 12)).pack()
 
     def iniciar_cronometro(self):
         self.tiempo_inicio = time.time()

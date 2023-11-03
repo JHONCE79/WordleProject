@@ -1,3 +1,4 @@
+import textwrap
 from tkinter import *
 import requests
 import time
@@ -207,8 +208,13 @@ class WordleGame:
         self.guardar_resultado(self.palabra_correcta, self.entrada_palabra.get(), resultado)
 
         random_word = get_random_word_with_meaning(5)
-        Label(self.resultado_ventana, text=f"Palabra correcta: {random_word['word']}", font=("Courier", 12)).pack()
-        Label(self.resultado_ventana, text=f"Significado: {random_word['definition']}", font=("Courier", 12)).pack()
+        palabra_correcta = random_word['word']
+        significado = random_word['definition']
+        significado_lineas = "\n".join(textwrap.wrap(significado, width=40))  # Ajusta el texto a 40 caracteres por línea
+
+        Label(self.resultado_ventana, text=f"Palabra correcta: {palabra_correcta}", font=("Courier", 12)).pack()
+        Label(self.resultado_ventana, text=f"Significado:", font=("Courier", 12)).pack()
+        Label(self.resultado_ventana, text=significado_lineas, font=("Courier", 12)).pack()
 
     def iniciar_cronometro(self):
         self.tiempo_inicio = time.time()

@@ -6,3 +6,6 @@ Palabra correcta: loath, Palabra ingresada: print, Resultado: Derrota
 Palabra correcta: carpi, Palabra ingresada: print, Resultado: Derrota
 Palabra correcta: nyala, Palabra ingresada: print, Resultado: Derrota
 Palabra correcta: cyton, Palabra ingresada: print, Resultado: Derrota
+Palabra correcta: moots, Palabra ingresada: print, Resultado: Derrota
+Palabra correcta: merle, Palabra ingresada: print, Resultado: Derrota
+Palabra correcta: gybes, Palabra ingresada: close, Resultado: Derrota
